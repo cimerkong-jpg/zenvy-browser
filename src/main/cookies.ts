@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs'
-import { join } from 'path'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { join, dirname } from 'path'
 import { app } from 'electron'
 
 export interface Cookie {
@@ -75,6 +75,10 @@ export function importCookies(profileId: string, filePath: string): Cookie[] {
   
   // Save to profile
   const cookiesPath = getCookiesPath(profileId)
+  const dir = dirname(cookiesPath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
   writeFileSync(cookiesPath, JSON.stringify(cookies, null, 2))
   
   return cookies
@@ -118,6 +122,10 @@ export function setCookie(profileId: string, cookie: Cookie): void {
   }
   
   const cookiesPath = getCookiesPath(profileId)
+  const dir = dirname(cookiesPath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
   writeFileSync(cookiesPath, JSON.stringify(cookies, null, 2))
 }
 
@@ -127,11 +135,19 @@ export function deleteCookie(profileId: string, domain: string, name: string): v
   const filtered = cookies.filter(c => !(c.domain === domain && c.name === name))
   
   const cookiesPath = getCookiesPath(profileId)
+  const dir = dirname(cookiesPath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
   writeFileSync(cookiesPath, JSON.stringify(filtered, null, 2))
 }
 
 // Clear all cookies for profile
 export function clearCookies(profileId: string): void {
   const cookiesPath = getCookiesPath(profileId)
+  const dir = dirname(cookiesPath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
   writeFileSync(cookiesPath, JSON.stringify([]))
 }
