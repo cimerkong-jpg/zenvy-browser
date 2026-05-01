@@ -80,11 +80,30 @@ export default function ProfileModal({ profile, onClose }: Props) {
         status: profile?.status ?? 'closed' as const
       }
       console.log('Saving profile:', data)
+      
+      let savedProfile: any
       if (isEdit && profile) {
-        await window.api.profiles.update(profile.id, data)
+        savedProfile = await window.api.profiles.update(profile.id, data)
       } else {
-        await window.api.profiles.create(data)
+        savedProfile = await window.api.profiles.create(data)
       }
+      
+      // Import cookies if JSON provided
+      if (cookies.trim()) {
+        try {
+          const cookieData = JSON.parse(cookies)
+          if (Array.isArray(cookieData) && cookieData.length > 0) {
+            const profileId = savedProfile?.id || profile?.id
+            if (profileId) {
+              await window.api.cookies.sync(profileId, cookieData)
+              console.log('Cookies imported successfully')
+            }
+          }
+        } catch (e) {
+          console.warn('Invalid cookie JSON, skipping import:', e)
+        }
+      }
+      
       await loadAll()
       onClose()
     } catch (error) {
