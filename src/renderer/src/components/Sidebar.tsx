@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
+import TemplateManager from './TemplateManager'
 
 const ZenvyLogo = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -18,6 +19,7 @@ export default function Sidebar() {
   const { groups, selectedGroupId, setSelectedGroupId, loadAll } = useStore()
   const [newGroupName, setNewGroupName] = useState('')
   const [showInput, setShowInput] = useState(false)
+  const [showTemplateManager, setShowTemplateManager] = useState(false)
 
   const createGroup = async () => {
     const name = newGroupName.trim()
@@ -35,7 +37,8 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-56 flex-shrink-0 flex flex-col border-r border-purple-500/10 bg-[#0D0B1A]">
+    <>
+      <aside className="w-56 flex-shrink-0 flex flex-col border-r border-purple-500/10 bg-[#0D0B1A]">
       {/* Title bar drag region */}
       <div className="drag-region h-8 flex-shrink-0" />
 
@@ -107,6 +110,20 @@ export default function Sidebar() {
             <span>+</span> Thêm nhóm
           </button>
         )}
+
+        {/* Templates section */}
+        <div className="pt-4">
+          <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            Templates
+          </p>
+          <button
+            onClick={() => setShowTemplateManager(true)}
+            className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-white/5 hover:text-white transition-all"
+          >
+            <span className="text-base">📋</span>
+            Quản lý Templates
+          </button>
+        </div>
       </nav>
 
       {/* Bottom */}
@@ -121,6 +138,12 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+
+      {/* Template Manager Modal */}
+      {showTemplateManager && (
+        <TemplateManager onClose={() => setShowTemplateManager(false)} />
+      )}
+    </>
   )
 }
