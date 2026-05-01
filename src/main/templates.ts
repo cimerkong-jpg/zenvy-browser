@@ -118,3 +118,14 @@ export function deleteCustomTemplate(name: string): void {
     fs.unlinkSync(filePath)
   }
 }
+
+// Export template to file
+export function exportTemplate(template: ProfileTemplate, filePath: string): void {
+  writeFileSync(filePath, JSON.stringify(template, null, 2))
+}
+
+// Import template from file
+export function importTemplate(filePath: string): ProfileTemplate {
+  const content = readFileSync(filePath, 'utf-8')
+  return JSON.parse(content) as ProfileTemplate
+}

@@ -39,7 +39,9 @@ const api = {
     getAll: () => ipcRenderer.invoke('templates:getAll'),
     get: (name: string) => ipcRenderer.invoke('templates:get', name),
     save: (template: any) => ipcRenderer.invoke('templates:save', template),
-    delete: (name: string) => ipcRenderer.invoke('templates:delete', name)
+    delete: (name: string) => ipcRenderer.invoke('templates:delete', name),
+    export: (template: any) => ipcRenderer.invoke('templates:export', template),
+    import: () => ipcRenderer.invoke('templates:import')
   }
 }
 

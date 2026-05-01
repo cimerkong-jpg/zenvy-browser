@@ -39,6 +39,31 @@ export default function TemplateManager({ onClose }: Props) {
     }
   }
 
+  const handleExport = async (template: Template) => {
+    try {
+      const success = await window.api.templates.export(template)
+      if (success) {
+        alert('✅ Template đã được export!')
+      }
+    } catch (error) {
+      console.error('Failed to export template:', error)
+      alert('Lỗi khi export template')
+    }
+  }
+
+  const handleImport = async () => {
+    try {
+      const template = await window.api.templates.import()
+      if (template) {
+        await loadTemplates()
+        alert(`✅ Template "${template.name}" đã được import!`)
+      }
+    } catch (error) {
+      console.error('Failed to import template:', error)
+      alert('Lỗi khi import template')
+    }
+  }
+
   // Separate built-in and custom templates
   const builtInTemplates = templates.filter(t => 
     ['Facebook', 'Google', 'Amazon', 'TikTok', 'Instagram'].includes(t.name)
@@ -104,6 +129,12 @@ export default function TemplateManager({ onClose }: Props) {
                         </div>
                         <div className="flex gap-2">
                           <button
+                            onClick={() => handleExport(t)}
+                            className="px-3 py-1 text-sm bg-blue-500/20 hover:bg-blue-500/30 rounded text-blue-400"
+                          >
+                            Export
+                          </button>
+                          <button
                             onClick={() => handleDelete(t.name)}
                             className="px-3 py-1 text-sm bg-red-500/20 hover:bg-red-500/30 rounded text-red-400"
                           >
@@ -120,7 +151,13 @@ export default function TemplateManager({ onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/5 flex justify-end">
+        <div className="px-6 py-4 border-t border-white/5 flex justify-between">
+          <button
+            onClick={handleImport}
+            className="px-6 py-2 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
+          >
+            📥 Import Template
+          </button>
           <button
             onClick={onClose}
             className="px-6 py-2 rounded-lg bg-white/10 hover:bg-white/20"

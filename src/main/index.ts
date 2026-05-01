@@ -130,6 +130,29 @@ app.whenReady().then(() => {
   ipcMain.handle('templates:get', (_, name: string) => templates.getTemplate(name))
   ipcMain.handle('templates:save', (_, template: any) => templates.saveCustomTemplate(template))
   ipcMain.handle('templates:delete', (_, name: string) => templates.deleteCustomTemplate(name))
+  
+  ipcMain.handle('templates:export', async (_, template: any) => {
+    const result = await dialog.showSaveDialog({
+      title: 'Export Template',
+      defaultPath: `${template.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.json`,
+      filters: [{ name: 'JSON Files', extensions: ['json'] }]
+    })
+    if (result.canceled || !result.filePath) return false
+    templates.exportTemplate(template, result.filePath)
+    return true
+  })
+  
+  ipcMain.handle('templates:import', async () => {
+    const result = await dialog.showOpenDialog({
+      title: 'Import Template',
+      filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      properties: ['openFile']
+    })
+    if (result.canceled || !result.filePaths[0]) return null
+    const template = templates.importTemplate(result.filePaths[0])
+    templates.saveCustomTemplate(template)
+    return template
+  })
 
   createWindow()
 
