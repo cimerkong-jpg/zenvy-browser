@@ -126,8 +126,10 @@ app.whenReady().then(() => {
   })
 
   // ── Template handlers ────────────────────────────────────────────────────
-  ipcMain.handle('templates:getAll', () => templates.getTemplates())
+  ipcMain.handle('templates:getAll', () => templates.getAllTemplates())
   ipcMain.handle('templates:get', (_, name: string) => templates.getTemplate(name))
+  ipcMain.handle('templates:save', (_, template: any) => templates.saveCustomTemplate(template))
+  ipcMain.handle('templates:delete', (_, name: string) => templates.deleteCustomTemplate(name))
 
   createWindow()
 

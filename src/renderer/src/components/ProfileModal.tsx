@@ -52,6 +52,10 @@ export default function ProfileModal({ profile, onClose }: Props) {
   const [tab, setTab] = useState<'basic' | 'fingerprint' | 'proxy'>('basic')
   const [saving, setSaving] = useState(false)
   const [templates, setTemplates] = useState<any[]>([])
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateDesc, setTemplateDesc] = useState('')
+  const [templateIcon, setTemplateIcon] = useState('⭐')
 
   useEffect(() => {
     window.api.templates.getAll().then(setTemplates)
@@ -70,6 +74,37 @@ export default function ProfileModal({ profile, onClose }: Props) {
 
   const fp = (key: keyof Fingerprint, val: string | number) =>
     setFingerprint((f) => ({ ...f, [key]: val }))
+
+  const handleSaveAsTemplate = async () => {
+    if (!templateName.trim()) {
+      alert('Vui lòng nhập tên template')
+      return
+    }
+    
+    try {
+      await window.api.templates.save({
+        name: templateName.trim(),
+        description: templateDesc.trim() || `Custom template: ${templateName}`,
+        icon: templateIcon,
+        fingerprint,
+        proxy
+      })
+      
+      // Reload templates
+      const updated = await window.api.templates.getAll()
+      setTemplates(updated)
+      
+      setShowSaveTemplate(false)
+      setTemplateName('')
+      setTemplateDesc('')
+      setTemplateIcon('⭐')
+      
+      alert('✅ Template đã được lưu!')
+    } catch (error) {
+      console.error('Failed to save template:', error)
+      alert('Lỗi khi lưu template')
+    }
+  }
 
   const handleSave = async () => {
     if (!name.trim()) return
@@ -333,19 +368,77 @@ export default function ProfileModal({ profile, onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/5">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-all">
-            Hủy
-          </button>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-white/5">
           <button
-            onClick={handleSave}
-            disabled={saving || !name.trim()}
-            className="btn-primary text-white text-sm font-medium px-5 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setShowSaveTemplate(true)}
+            className="px-4 py-2 text-sm text-purple-400 hover:text-purple-300 rounded-lg hover:bg-purple-500/10 transition-all"
           >
-            {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo hồ sơ'}
+            💾 Lưu làm Template
           </button>
+          <div className="flex gap-3">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+              Hủy
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || !name.trim()}
+              className="btn-primary text-white text-sm font-medium px-5 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo hồ sơ'}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Save Template Modal */}
+      {showSaveTemplate && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60">
+          <div className="glass rounded-xl w-96 p-6">
+            <h3 className="text-lg font-semibold mb-4">Lưu làm Template</h3>
+            <div className="space-y-3">
+              <Field label="Tên Template *">
+                <input
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="VD: My Custom Template"
+                  className="input-field"
+                />
+              </Field>
+              <Field label="Mô tả">
+                <input
+                  value={templateDesc}
+                  onChange={(e) => setTemplateDesc(e.target.value)}
+                  placeholder="Mô tả ngắn gọn..."
+                  className="input-field"
+                />
+              </Field>
+              <Field label="Icon">
+                <input
+                  value={templateIcon}
+                  onChange={(e) => setTemplateIcon(e.target.value)}
+                  placeholder="⭐"
+                  className="input-field text-2xl"
+                  maxLength={2}
+                />
+              </Field>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowSaveTemplate(false)}
+                className="flex-1 px-4 py-2 text-sm rounded-lg bg-white/5 hover:bg-white/10"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSaveAsTemplate}
+                className="flex-1 btn-primary px-4 py-2 text-sm rounded-lg"
+              >
+                Lưu Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
