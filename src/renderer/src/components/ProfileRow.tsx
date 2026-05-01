@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { Profile, Group } from '../../../shared/types'
 import { useStore } from '../store/useStore'
+import CookieManager from './CookieManager'
 
 interface Props {
   profile: Profile
@@ -11,6 +13,7 @@ interface Props {
 
 export default function ProfileRow({ profile, groups, isRunning, isSelected, onEdit }: Props) {
   const { toggleSelect, loadAll, runningIds } = useStore()
+  const [showCookies, setShowCookies] = useState(false)
   const group = groups.find((g) => g.id === profile.groupId)
 
   const handleLaunch = async () => {
@@ -108,6 +111,13 @@ export default function ProfileRow({ profile, groups, isRunning, isSelected, onE
             {isRunning ? 'Đóng' : 'Mở'}
           </button>
           <button
+            onClick={() => setShowCookies(true)}
+            className="text-xs px-2 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            title="Cookies"
+          >
+            🍪
+          </button>
+          <button
             onClick={() => onEdit(profile)}
             className="text-xs px-2 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
           >
@@ -121,6 +131,8 @@ export default function ProfileRow({ profile, groups, isRunning, isSelected, onE
           </button>
         </div>
       </td>
+      
+      {showCookies && <CookieManager profileId={profile.id} onClose={() => setShowCookies(false)} />}
     </tr>
   )
 }
