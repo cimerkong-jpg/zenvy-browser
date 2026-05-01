@@ -3,6 +3,7 @@ import { join } from 'path'
 import * as db from './db'
 import * as browser from './browser'
 import * as cookies from './cookies'
+import * as templates from './templates'
 import type { Profile } from '../shared/types'
 import type { Cookie } from './cookies'
 
@@ -123,6 +124,10 @@ app.whenReady().then(() => {
   ipcMain.handle('cookies:sync', (_, profileId: string, chromeCookies: any[]) => {
     cookies.syncCookiesFromBrowser(profileId, chromeCookies)
   })
+
+  // ── Template handlers ────────────────────────────────────────────────────
+  ipcMain.handle('templates:getAll', () => templates.getTemplates())
+  ipcMain.handle('templates:get', (_, name: string) => templates.getTemplate(name))
 
   createWindow()
 

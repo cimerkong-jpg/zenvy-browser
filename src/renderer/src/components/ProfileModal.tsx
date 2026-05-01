@@ -51,6 +51,11 @@ export default function ProfileModal({ profile, onClose }: Props) {
   const [proxy, setProxy] = useState<Proxy>(defaultProxy)
   const [tab, setTab] = useState<'basic' | 'fingerprint' | 'proxy'>('basic')
   const [saving, setSaving] = useState(false)
+  const [templates, setTemplates] = useState<any[]>([])
+
+  useEffect(() => {
+    window.api.templates.getAll().then(setTemplates)
+  }, [])
 
   useEffect(() => {
     if (profile) {
@@ -198,6 +203,27 @@ export default function ProfileModal({ profile, onClose }: Props) {
 
           {tab === 'fingerprint' && (
             <>
+              {!isEdit && templates.length > 0 && (
+                <Field label="Template">
+                  <div className="grid grid-cols-5 gap-2">
+                    {templates.map((t) => (
+                      <button
+                        key={t.name}
+                        onClick={() => {
+                          setFingerprint(t.fingerprint)
+                          setProxy(t.proxy)
+                        }}
+                        className="p-3 rounded-lg border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all text-center"
+                        title={t.description}
+                      >
+                        <div className="text-2xl mb-1">{t.icon}</div>
+                        <div className="text-xs text-white/80">{t.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              )}
+
               <Field label="User Agent">
                 <select
                   onChange={(e) => fp('userAgent', UA_PRESETS[e.target.value] || '')}

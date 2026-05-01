@@ -34,6 +34,10 @@ const api = {
     export: (profileId: string) => ipcRenderer.invoke('cookies:export', profileId),
     sync: (profileId: string, chromeCookies: any[]) => 
       ipcRenderer.invoke('cookies:sync', profileId, chromeCookies)
+  },
+  templates: {
+    getAll: () => ipcRenderer.invoke('templates:getAll'),
+    get: (name: string) => ipcRenderer.invoke('templates:get', name)
   }
 }
 
