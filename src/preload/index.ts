@@ -31,7 +31,9 @@ const api = {
       ipcRenderer.invoke('cookies:delete', profileId, domain, name),
     clear: (profileId: string) => ipcRenderer.invoke('cookies:clear', profileId),
     import: (profileId: string) => ipcRenderer.invoke('cookies:import', profileId),
-    export: (profileId: string) => ipcRenderer.invoke('cookies:export', profileId)
+    export: (profileId: string) => ipcRenderer.invoke('cookies:export', profileId),
+    sync: (profileId: string, chromeCookies: any[]) => 
+      ipcRenderer.invoke('cookies:sync', profileId, chromeCookies)
   }
 }
 

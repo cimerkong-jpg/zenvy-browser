@@ -64,6 +64,31 @@ export function toNetscapeFormat(cookies: Cookie[]): string {
   return content
 }
 
+// Auto-detect and parse cookies (Netscape or JSON)
+function parseAnyCookieFormat(content: string): Cookie[] {
+  // Try JSON first
+  try {
+    const parsed = JSON.parse(content)
+    if (Array.isArray(parsed)) {
+      // Already in our format or similar
+      return parsed.map(c => ({
+        domain: c.domain || '',
+        name: c.name || '',
+        value: c.value || '',
+        path: c.path || '/',
+        expires: c.expires || c.expirationDate * 1000 || Date.now() + 365*24*60*60*1000,
+        httpOnly: c.httpOnly || false,
+        secure: c.secure || false,
+        sameSite: c.sameSite
+      }))
+    }
+  } catch {
+    // Not JSON, try Netscape format
+  }
+  
+  return parseNetscapeCookies(content)
+}
+
 // Import cookies from file
 export function importCookies(profileId: string, filePath: string): Cookie[] {
   if (!existsSync(filePath)) {
@@ -71,7 +96,7 @@ export function importCookies(profileId: string, filePath: string): Cookie[] {
   }
   
   const content = readFileSync(filePath, 'utf-8')
-  const cookies = parseNetscapeCookies(content)
+  const cookies = parseAnyCookieFormat(content)
   
   // Save to profile
   const cookiesPath = getCookiesPath(profileId)
@@ -150,4 +175,25 @@ export function clearCookies(profileId: string): void {
     mkdirSync(dir, { recursive: true })
   }
   writeFileSync(cookiesPath, JSON.stringify([]))
+}
+
+// Sync cookies from Chrome session to storage
+export function syncCookiesFromBrowser(profileId: string, chromeCookies: any[]): void {
+  const cookies: Cookie[] = chromeCookies.map(c => ({
+    domain: c.domain,
+    name: c.name,
+    value: c.value,
+    path: c.path || '/',
+    expires: c.expirationDate ? c.expirationDate * 1000 : Date.now() + 365*24*60*60*1000,
+    httpOnly: c.httpOnly || false,
+    secure: c.secure || false,
+    sameSite: c.sameSite as any
+  }))
+  
+  const cookiesPath = getCookiesPath(profileId)
+  const dir = dirname(cookiesPath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
+  writeFileSync(cookiesPath, JSON.stringify(cookies, null, 2))
 }

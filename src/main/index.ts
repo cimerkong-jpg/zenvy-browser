@@ -119,6 +119,10 @@ app.whenReady().then(() => {
     cookies.exportCookies(profileId, result.filePath)
     return true
   })
+  
+  ipcMain.handle('cookies:sync', (_, profileId: string, chromeCookies: any[]) => {
+    cookies.syncCookiesFromBrowser(profileId, chromeCookies)
+  })
 
   createWindow()
 
