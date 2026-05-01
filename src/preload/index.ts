@@ -23,6 +23,15 @@ const api = {
       ipcRenderer.invoke('browser:launch', profile),
     close: (profileId: string): Promise<void> => ipcRenderer.invoke('browser:close', profileId),
     running: (): Promise<string[]> => ipcRenderer.invoke('browser:running')
+  },
+  cookies: {
+    get: (profileId: string) => ipcRenderer.invoke('cookies:get', profileId),
+    set: (profileId: string, cookie: any) => ipcRenderer.invoke('cookies:set', profileId, cookie),
+    delete: (profileId: string, domain: string, name: string) => 
+      ipcRenderer.invoke('cookies:delete', profileId, domain, name),
+    clear: (profileId: string) => ipcRenderer.invoke('cookies:clear', profileId),
+    import: (profileId: string) => ipcRenderer.invoke('cookies:import', profileId),
+    export: (profileId: string) => ipcRenderer.invoke('cookies:export', profileId)
   }
 }
 

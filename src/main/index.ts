@@ -1,8 +1,10 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import * as db from './db'
 import * as browser from './browser'
+import * as cookies from './cookies'
 import type { Profile } from '../shared/types'
+import type { Cookie } from './cookies'
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
 declare const MAIN_WINDOW_VITE_NAME: string
@@ -88,6 +90,35 @@ app.whenReady().then(() => {
   ipcMain.handle('browser:launch', (_, profile: Profile) => browser.launchProfile(profile))
   ipcMain.handle('browser:close', (_, profileId: string) => browser.closeProfile(profileId))
   ipcMain.handle('browser:running', () => browser.getRunningProfiles())
+
+  // ── Cookie handlers ──────────────────────────────────────────────────────
+  ipcMain.handle('cookies:get', (_, profileId: string) => cookies.getCookies(profileId))
+  ipcMain.handle('cookies:set', (_, profileId: string, cookie: Cookie) => cookies.setCookie(profileId, cookie))
+  ipcMain.handle('cookies:delete', (_, profileId: string, domain: string, name: string) => 
+    cookies.deleteCookie(profileId, domain, name)
+  )
+  ipcMain.handle('cookies:clear', (_, profileId: string) => cookies.clearCookies(profileId))
+  
+  ipcMain.handle('cookies:import', async (_, profileId: string) => {
+    const result = await dialog.showOpenDialog({
+      title: 'Import Cookies',
+      filters: [{ name: 'Cookie Files', extensions: ['txt'] }],
+      properties: ['openFile']
+    })
+    if (result.canceled || !result.filePaths[0]) return null
+    return cookies.importCookies(profileId, result.filePaths[0])
+  })
+  
+  ipcMain.handle('cookies:export', async (_, profileId: string) => {
+    const result = await dialog.showSaveDialog({
+      title: 'Export Cookies',
+      defaultPath: 'cookies.txt',
+      filters: [{ name: 'Cookie Files', extensions: ['txt'] }]
+    })
+    if (result.canceled || !result.filePath) return false
+    cookies.exportCookies(profileId, result.filePath)
+    return true
+  })
 
   createWindow()
 
